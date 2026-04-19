@@ -3,7 +3,7 @@
 window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); });
 
 const RICKROLL_URL   = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
-const DEV_MODE       = false;
+const DEV_MODE       = true;
 const PRIZE_DELAY_MS = DEV_MODE ? 10 * 1000 : 6 * 60 * 60 * 1000;
 
 if (location.search.includes('reset')) { localStorage.clear(); location.replace(location.pathname); }
