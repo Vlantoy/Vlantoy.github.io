@@ -4,7 +4,7 @@
 //  CONFIG  —  Replace these values before deploying
 // ══════════════════════════════════════════════════════════════════
 const ONESIGNAL_APP_ID      = 'f9a948e0-79d4-46d7-9fae-6edb3f2b361d';
-const ONESIGNAL_REST_KEY    = 'os_v2_app_7guurydz2rdnph5on3nt6kzwdxbfnkx3722u54nz6iosoja7bsjhbmg6kwjgcouiwqqwngzwyjjy6oaypvn4hdv77vpjdvb6qfcwtaa';
+const ONESIGNAL_REST_KEY    = 'os_v2_app_7guurydz2rdnph5on3nt6kzwdxgor6hnjh7eab5o7tgvb4ytp2suellndgx2skfxye6hpyldjob7afhhsr7oedjdnc3h73rhhyx7eta';
 const RICKROLL_URL          = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
 
 // ── DEV MODE ─────────────────────────────────────────────────────
