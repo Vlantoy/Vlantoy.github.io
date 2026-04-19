@@ -4,8 +4,7 @@
 //  CONFIG  —  Replace these values before deploying
 // ══════════════════════════════════════════════════════════════════
 const ONESIGNAL_APP_ID      = 'f9a948e0-79d4-46d7-9fae-6edb3f2b361d';
-const ONESIGNAL_REST_KEY    = 'os_v2_app_7guurydz2rdnph5on3nt6kzwdxgor6hnjh7eab5o7tgvb4ytp2suellndgx2skfxye6hpyldjob7afhhsr7oedjdnc3h73rhhyx7eta';
-const RICKROLL_URL          = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
+const CLOUDFLARE_WORKER_URL = 'https://rickroll-scheduler.vlantoy.workers.dev';
 
 // ── DEV MODE ─────────────────────────────────────────────────────
 const DEV_MODE = false;
@@ -122,34 +121,23 @@ async function requestNotificationPermission() {
     }
     if (!playerId) throw new Error('Không lấy được subscription ID sau 20s. Thử reset permission trong Chrome Settings rồi thử lại.');
 
-    // Step 4: Schedule thông báo qua OneSignal REST API
+    // Step 4: Schedule qua Cloudflare Worker (proxy tránh CORS block của OneSignal)
     setStatus('⏳ [4/4] Lên lịch thông báo...');
-    const sendAt       = Date.now() + PRIZE_DELAY_MS;
-    const sendAfterISO = new Date(sendAt).toISOString();
+    const sendAt = Date.now() + PRIZE_DELAY_MS;
 
-    let notifRes;
+    let workerRes;
     try {
-      notifRes = await fetch('https://onesignal.com/api/v1/notifications', {
+      workerRes = await fetch(`${CLOUDFLARE_WORKER_URL}/subscribe`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Basic ${ONESIGNAL_REST_KEY}`,
-        },
-        body: JSON.stringify({
-          app_id:                    ONESIGNAL_APP_ID,
-          include_subscription_ids: [playerId],
-          headings: { vi: 'Tin nhắn đã bỏ lỡ', en: 'Tin nhắn đã bỏ lỡ' },
-          contents: { vi: 'Phùng Khánh Linh đã nhắn tin cho bạn.', en: 'Phùng Khánh Linh đã nhắn tin cho bạn.' },
-          url:        RICKROLL_URL,
-          send_after: sendAfterISO,
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ playerId, sendAt }),
       });
     } catch (fetchErr) {
-      throw new Error(`Không kết nối được OneSignal: ${fetchErr.message}`);
+      throw new Error(`Không kết nối được Worker: ${fetchErr.message}`);
     }
-    if (!notifRes.ok) {
-      const txt = await notifRes.text().catch(() => '');
-      throw new Error(`OneSignal lỗi ${notifRes.status}: ${txt}`);
+    if (!workerRes.ok) {
+      const txt = await workerRes.text().catch(() => '');
+      throw new Error(`Worker lỗi ${workerRes.status}: ${txt}`);
     }
 
     localStorage.setItem('prizeAt', String(sendAt));
