@@ -4,10 +4,10 @@
 //  CONFIG  —  Replace these values before deploying
 // ══════════════════════════════════════════════════════════════════
 const ONESIGNAL_APP_ID      = 'f9a948e0-79d4-46d7-9fae-6edb3f2b361d';
-const CLOUDFLARE_WORKER_URL = 'https://YOUR_WORKER.workers.dev'; // chưa cần, bỏ qua khi DEV_MODE=true
+const CLOUDFLARE_WORKER_URL = 'https://rickroll-scheduler.vlantoy.workers.dev';
 
 // ── DEV MODE ─────────────────────────────────────────────────────
-const DEV_MODE = true;
+const DEV_MODE = false;
 const ONESIGNAL_USER_AUTH_KEY = 'os_v2_app_7guurydz2rdnph5on3nt6kzwdwyaqshodfduwl5w2bdpowc7gkteyklzjq2gnc2wetdu4gcsm2b6zsjjowsdhjiyms37u42qu2srzaa';
 // ══════════════════════════════════════════════════════════════════
 
