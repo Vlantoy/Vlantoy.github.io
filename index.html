@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>Thử Thách Phản Xạ</title>
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#e1306c" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Quà Bí Ẩn" />
+  <link rel="apple-touch-icon" href="assets/icon-192.png" />
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ══ SCREEN 1: Intro ══════════════════════════════════════════ -->
+  <section class="screen active" id="screen-intro">
+    <div class="screen-content">
+      <div class="hero-icon">🏆</div>
+      <h1>Thử Thách<br>Phản Xạ</h1>
+      <p>Tap càng nhanh càng tốt trong <strong>10 giây</strong></p>
+      <p class="hint">🎁 Phần thưởng bí ẩn đang chờ bạn...</p>
+      <button class="btn btn-primary" id="btn-start">Bắt Đầu</button>
+    </div>
+  </section>
+
+  <!-- ══ SCREEN 2: Game ═══════════════════════════════════════════ -->
+  <section class="screen" id="screen-game">
+    <div class="screen-content">
+      <div class="game-header">
+        <span class="game-stat">⏱ <span id="time-left">10</span>s</span>
+        <span class="game-stat accent">👆 <span id="click-count">0</span></span>
+      </div>
+      <div class="timer-track">
+        <div class="timer-bar" id="timer-bar"></div>
+      </div>
+      <button class="game-btn" id="game-btn" aria-label="Tap!">
+        <span class="game-btn-label">TAP!</span>
+      </button>
+      <p class="hint">Spam mạnh vào nút!</p>
+    </div>
+  </section>
+
+  <!-- ══ SCREEN 3: Result ═════════════════════════════════════════ -->
+  <section class="screen" id="screen-result">
+    <div class="screen-content">
+      <div class="hero-icon">🎯</div>
+      <h2>Kết Quả</h2>
+      <div class="score-wrap">
+        <span id="final-score">0</span>
+        <span class="score-unit">clicks</span>
+      </div>
+      <p class="rating" id="rating"></p>
+
+      <div class="card">
+        <div style="font-size:2.2rem">🎁</div>
+        <h3>Chúc mừng!</h3>
+        <p>Bạn đã mở khóa <strong>phần thưởng bí ẩn</strong></p>
+        <p class="hint">Phần thưởng sẽ đến sau đúng <strong>6 tiếng</strong></p>
+      </div>
+
+      <button class="btn btn-primary" id="btn-get-prize">Nhận Ngay 🔔</button>
+      <button class="btn btn-ghost" id="btn-retry">Chơi Lại</button>
+    </div>
+  </section>
+
+  <!-- ══ SCREEN 4: Notification permission ════════════════════════ -->
+  <section class="screen" id="screen-notify">
+    <div class="screen-content">
+      <div class="hero-icon">🔔</div>
+      <h2>Bật Thông Báo</h2>
+      <p>Cho phép thông báo để nhận quà sau đúng <strong>6 tiếng</strong></p>
+      <p class="hint">Không cần mở lại trang — chúng tôi sẽ nhắc bạn</p>
+
+      <div class="card ios-tip" id="ios-tip" style="display:none">
+        <p style="font-size:0.85rem">📱 <strong>iPhone?</strong> Bạn cần <em>Add to Home Screen</em> trước:<br>
+        Safari → nút Chia sẻ → <em>Thêm vào màn hình chính</em> → mở lại app</p>
+      </div>
+
+      <button class="btn btn-primary" id="btn-allow">Bật Thông Báo 🔔</button>
+      <button class="btn btn-ghost" id="btn-skip">Để sau (sẽ mất quà 😢)</button>
+      <p class="error-msg hidden" id="error-msg"></p>
+    </div>
+  </section>
+
+  <!-- ══ SCREEN 5: Success / Countdown ════════════════════════════ -->
+  <section class="screen" id="screen-success">
+    <div class="screen-content">
+      <div class="hero-icon">✅</div>
+      <h2>Đã Đăng Ký!</h2>
+      <p>Phần thưởng sẽ đến sau:</p>
+      <div class="countdown" id="countdown">06:00:00</div>
+      <p class="hint" id="success-msg">Giữ điện thoại sạc và bật thông báo nhé 😄</p>
+      <button class="btn btn-ghost" id="btn-share">Thử Thách Bạn Bè</button>
+    </div>
+  </section>
+
+  <!-- OneSignal Web SDK v16 -->
+  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+  <script src="app.js"></script>
+</body>
+</html>

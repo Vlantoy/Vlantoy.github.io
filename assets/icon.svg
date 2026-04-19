@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192">
+  <!-- Blue circle background — matches notification icon in image -->
+  <circle cx="96" cy="96" r="96" fill="#3897f0"/>
+  <!-- Camera rounded-square body -->
+  <rect x="42" y="54" width="108" height="90" rx="24" ry="24"
+        fill="none" stroke="white" stroke-width="9"/>
+  <!-- Viewfinder bump on top -->
+  <path d="M75 54 C75 40 81 36 87 36 L105 36 C111 36 117 40 117 54"
+        fill="white"/>
+  <!-- Lens ring outer -->
+  <circle cx="96" cy="99" r="25" fill="none" stroke="white" stroke-width="9"/>
+  <!-- Lens inner dot -->
+  <circle cx="96" cy="99" r="9" fill="white"/>
+  <!-- Flash dot -->
+  <circle cx="140" cy="72" r="7" fill="white"/>
+</svg>
