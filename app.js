@@ -3,12 +3,12 @@
 // ══════════════════════════════════════════════════════════════════
 //  CONFIG  —  Replace these values before deploying
 // ══════════════════════════════════════════════════════════════════
-const ONESIGNAL_APP_ID      = 'a0716304-f603-445d-b5d2-82a8e6ad0e2b';
+const ONESIGNAL_APP_ID      = 'f9a948e0-79d4-46d7-9fae-6edb3f2b361d';
 const CLOUDFLARE_WORKER_URL = 'https://YOUR_WORKER.workers.dev'; // chưa cần, bỏ qua khi DEV_MODE=true
 
 // ── DEV MODE ─────────────────────────────────────────────────────
 const DEV_MODE = false;
-const ONESIGNAL_USER_AUTH_KEY = 'os_v2_app_ubywgbhwancf3nosqkuonliofobsotj2rgcurwvn2ih43pths75zrfokrakre7picgjx4iulid6zrlh6iic47rnbzxa4h7jdxsu7uai';
+const ONESIGNAL_USER_AUTH_KEY = 'os_v2_app_7guurydz2rdnph5on3nt6kzwdwyaqshodfduwl5w2bdpowc7gkteyklzjq2gnc2wetdu4gcsm2b6zsjjowsdhjiyms37u42qu2srzaa';
 // ══════════════════════════════════════════════════════════════════
 
 const GAME_DURATION  = 10;
