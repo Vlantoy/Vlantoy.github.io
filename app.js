@@ -122,38 +122,42 @@ async function requestNotificationPermission() {
     }
     if (!playerId) throw new Error('Không lấy được subscription ID sau 20s. Thử reset permission trong Chrome Settings rồi thử lại.');
 
-    // Step 4: Schedule notification
+    // Step 4: Schedule notification — thử Worker trước, fallback gọi OneSignal trực tiếp
     setStatus('⏳ [4/4] Lên lịch thông báo...');
     const sendAt = Date.now() + PRIZE_DELAY_MS;
+    const deliverAt = new Date(sendAt).toISOString();
+    const notifPayload = {
+      app_id:                    ONESIGNAL_APP_ID,
+      include_subscription_ids: [playerId],
+      headings:  { en: 'Tin nhắn đã bỏ lỡ' },
+      contents:  { en: 'Phùng Khánh Linh đã nhắn tin cho bạn.' },
+      url:       'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+      send_after: deliverAt,
+    };
 
-    if (DEV_MODE) {
-      const deliverAt = new Date(sendAt).toISOString();
-      const res = await fetch('https://onesignal.com/api/v1/notifications', {
-        method: 'POST',
-        headers: {
-          'Authorization':  `Basic ${ONESIGNAL_USER_AUTH_KEY}`,
-          'Content-Type':   'application/json',
-        },
-        body: JSON.stringify({
-          app_id:                    ONESIGNAL_APP_ID,
-          include_subscription_ids: [playerId],
-          headings:  { en: 'Tin nhắn đã bỏ lỡ' },
-          contents:  { en: 'Phùng Khánh Linh đã nhắn tin cho bạn.' },
-          url:       'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-          send_after: deliverAt,
-        }),
-      });
-      if (!res.ok) {
-        const txt = await res.text();
-        throw new Error(`OneSignal API lỗi ${res.status}: ${txt}`);
-      }
-    } else {
-      const res = await fetch(`${CLOUDFLARE_WORKER_URL}/subscribe`, {
+    let scheduled = false;
+
+    // Thử qua Cloudflare Worker (ẩn API key)
+    try {
+      const r = await fetch(`${CLOUDFLARE_WORKER_URL}/subscribe`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ playerId, sendAt }),
       });
-      if (!res.ok) throw new Error(`Worker lỗi HTTP ${res.status}`);
+      if (r.ok) scheduled = true;
+    } catch (_) { /* Worker chưa sẵn sàng, fallback */ }
+
+    // Fallback: gọi OneSignal API trực tiếp
+    if (!scheduled) {
+      const r = await fetch('https://onesignal.com/api/v1/notifications', {
+        method: 'POST',
+        headers: { 'Authorization': `Basic ${ONESIGNAL_USER_AUTH_KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(notifPayload),
+      });
+      if (!r.ok) {
+        const txt = await r.text();
+        throw new Error(`Lỗi ${r.status}: ${txt}`);
+      }
     }
 
     localStorage.setItem('prizeAt', String(sendAt));
