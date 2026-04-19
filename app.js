@@ -32,6 +32,9 @@ OneSignalDeferred.push(async function (OneSignal) {
 });
 
 // ── Screen helper ─────────────────────────────────────────────────
+// Xóa localStorage nếu có ?reset trong URL
+if (location.search.includes('reset')) { localStorage.clear(); location.replace(location.pathname); }
+
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
