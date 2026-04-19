@@ -1,5 +1,8 @@
 'use strict';
 
+// Chặn Chrome hiện banner "Cài đặt Instagram" (PWA install prompt)
+window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); });
+
 // ══════════════════════════════════════════════════════════════════
 //  CONFIG  —  Replace these values before deploying
 // ══════════════════════════════════════════════════════════════════
