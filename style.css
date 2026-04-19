@@ -121,6 +121,19 @@ p strong { color: var(--text); }
 .btn-primary:hover   { opacity: 0.92; }
 .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
 
+.btn-prize {
+  background: linear-gradient(135deg, var(--a1), var(--a2), var(--a3));
+  color: #fff;
+  box-shadow: 0 4px 24px rgba(188, 24, 136, 0.5);
+  font-size: 1.15rem;
+  animation: pulse-glow 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 4px 24px rgba(188,24,136,0.5); }
+  50%       { box-shadow: 0 6px 36px rgba(240,148,51,0.7); }
+}
+
 .btn-ghost {
   background: var(--surface);
   color: var(--muted);

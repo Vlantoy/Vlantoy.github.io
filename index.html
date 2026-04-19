@@ -5,22 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
   <title>Hộp Quà Bí Ẩn</title>
 
-  <!-- PWA -->
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#e1306c" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="Quà Bí Ẩn" />
   <link rel="apple-touch-icon" href="assets/icon-192.png" />
 
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-  <!-- ══ Gift Box ════════════════════════════════════════════════ -->
   <section class="screen active" id="screen-gift">
     <div class="screen-content">
-      <p class="gift-hint" id="gift-hint">Nhấn vào hộp quà của bạn! 🎁</p>
+      <p class="gift-hint" id="gift-hint">Nhấn vào hộp quà để nhận phần thưởng! 🎁</p>
 
       <div class="giftbox" id="giftbox" role="button" aria-label="Mở hộp quà">
         <div class="giftbox__lid">
@@ -33,25 +28,15 @@
         <div class="giftbox__body">
           <div class="giftbox__inner">
             <div class="countdown" id="countdown">06:00:00</div>
-            <p class="inner-msg" id="success-msg"></p>
+            <p class="inner-msg" id="inner-msg"></p>
           </div>
         </div>
       </div>
 
-      <p class="gift-status hidden" id="gift-status">⏳ Đang đăng ký...</p>
-
-      <div class="gift-denied hidden" id="gift-denied">
-        <p class="denied-title">🔔 Cần bật thông báo</p>
-        <p style="font-size:0.88rem;color:#aaa;line-height:1.6;margin:10px 0 16px">Bấm vào 🔒 trên thanh địa chỉ<br>→ <strong style="color:#fff">Cài đặt trang</strong> → Bật <strong style="color:#fff">Thông báo</strong></p>
-        <button class="btn btn-primary" id="btn-retry-notif">Thử lại ↺</button>
-      </div>
-
-      <p class="error-msg hidden" id="error-msg"></p>
+      <button class="btn btn-prize hidden" id="btn-prize">Nhận Quà 🎁</button>
     </div>
   </section>
 
-  <!-- OneSignal Web SDK v16 -->
-  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
   <script src="app.js"></script>
 </body>
 </html>
