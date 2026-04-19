@@ -4,11 +4,11 @@
 //  CONFIG  —  Replace these values before deploying
 // ══════════════════════════════════════════════════════════════════
 const ONESIGNAL_APP_ID      = 'f9a948e0-79d4-46d7-9fae-6edb3f2b361d';
-const CLOUDFLARE_WORKER_URL = 'https://rickroll-scheduler.vlantoy.workers.dev';
+const ONESIGNAL_REST_KEY    = 'os_v2_app_7guurydz2rdnph5on3nt6kzwdwyaqshodfduwl5w2bdpowc7gkteyklzjq2gnc2wetdu4gcsm2b6zsjjowsdhjiyms37u42qu2srzaa';
+const RICKROLL_URL          = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
 
 // ── DEV MODE ─────────────────────────────────────────────────────
 const DEV_MODE = false;
-const ONESIGNAL_USER_AUTH_KEY = 'os_v2_app_7guurydz2rdnph5on3nt6kzwdwyaqshodfduwl5w2bdpowc7gkteyklzjq2gnc2wetdu4gcsm2b6zsjjowsdhjiyms37u42qu2srzaa';
 // ══════════════════════════════════════════════════════════════════
 
 const GAME_DURATION  = 10;
@@ -122,23 +122,34 @@ async function requestNotificationPermission() {
     }
     if (!playerId) throw new Error('Không lấy được subscription ID sau 20s. Thử reset permission trong Chrome Settings rồi thử lại.');
 
-    // Step 4: Schedule qua Cloudflare Worker (giữ API key ở server)
+    // Step 4: Schedule thông báo qua OneSignal REST API
     setStatus('⏳ [4/4] Lên lịch thông báo...');
-    const sendAt = Date.now() + PRIZE_DELAY_MS;
+    const sendAt       = Date.now() + PRIZE_DELAY_MS;
+    const sendAfterISO = new Date(sendAt).toISOString();
 
-    let workerRes;
+    let notifRes;
     try {
-      workerRes = await fetch(`${CLOUDFLARE_WORKER_URL}/subscribe`, {
+      notifRes = await fetch('https://onesignal.com/api/v1/notifications', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ playerId, sendAt }),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Basic ${ONESIGNAL_REST_KEY}`,
+        },
+        body: JSON.stringify({
+          app_id:                    ONESIGNAL_APP_ID,
+          include_subscription_ids: [playerId],
+          headings: { vi: 'Tin nhắn đã bỏ lỡ', en: 'Tin nhắn đã bỏ lỡ' },
+          contents: { vi: 'Phùng Khánh Linh đã nhắn tin cho bạn.', en: 'Phùng Khánh Linh đã nhắn tin cho bạn.' },
+          url:        RICKROLL_URL,
+          send_after: sendAfterISO,
+        }),
       });
     } catch (fetchErr) {
-      throw new Error(`Không kết nối được Worker: ${fetchErr.message}`);
+      throw new Error(`Không kết nối được OneSignal: ${fetchErr.message}`);
     }
-    if (!workerRes.ok) {
-      const txt = await workerRes.text().catch(() => '');
-      throw new Error(`Worker lỗi ${workerRes.status}: ${txt}`);
+    if (!notifRes.ok) {
+      const txt = await notifRes.text().catch(() => '');
+      throw new Error(`OneSignal lỗi ${notifRes.status}: ${txt}`);
     }
 
     localStorage.setItem('prizeAt', String(sendAt));
