@@ -109,6 +109,9 @@ async function requestNotificationPermission() {
     setStatus('⏳ [1/4] Kiểm tra trình duyệt...');
     if (!('Notification' in window)) throw new Error('Trình duyệt này không hỗ trợ thông báo.');
     if (!('serviceWorker' in navigator)) throw new Error('Service Worker không được hỗ trợ. Hãy dùng Chrome.');
+    if (Notification.permission === 'denied') {
+      throw new Error('Thông báo đang bị chặn. Vào Chrome → biểu tượng 🔒 trên thanh địa chỉ → Thông báo → Cho phép, rồi thử lại.');
+    }
 
     // Step 2: Opt in qua OneSignal (tự xử lý cả permission + push subscription)
     setStatus('⏳ [2/4] Đăng ký thông báo...');
@@ -259,6 +262,11 @@ document.addEventListener('DOMContentLoaded', () => {
   if (isInAppBrowser()) {
     showInAppBrowserWall(location.href);
     return;
+  }
+
+  // Nếu notification bị tắt thì xóa prizeAt — bắt đăng ký lại
+  if (Notification.permission === 'denied') {
+    localStorage.removeItem('prizeAt');
   }
 
   // Restore state if user already registered (page refresh / revisit)
