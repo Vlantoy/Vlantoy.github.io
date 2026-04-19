@@ -7,11 +7,11 @@ const ONESIGNAL_APP_ID      = 'f9a948e0-79d4-46d7-9fae-6edb3f2b361d';
 const CLOUDFLARE_WORKER_URL = 'https://rickroll-scheduler.vlantoy.workers.dev';
 
 // ── DEV MODE ─────────────────────────────────────────────────────
-const DEV_MODE = false;
+const DEV_MODE = true;
 // ══════════════════════════════════════════════════════════════════
 
 const GAME_DURATION  = 10;
-const PRIZE_DELAY_MS = DEV_MODE ? 5 * 1000 : 6 * 60 * 60 * 1000;    // 5s (dev) hoặc 6h (prod)
+const PRIZE_DELAY_MS = DEV_MODE ? 3 * 1000 : 6 * 60 * 60 * 1000;    // 3s (dev) hoặc 6h (prod)
 
 // ── State ─────────────────────────────────────────────────────────
 let currentState      = 'intro';
