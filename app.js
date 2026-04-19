@@ -97,38 +97,40 @@ function endGame() {
 
 // ── Notification flow ─────────────────────────────────────────────
 async function requestNotificationPermission() {
-  const allowBtn = document.getElementById('btn-allow');
+  const box      = document.getElementById('giftbox');
+  const statusEl = document.getElementById('gift-status');
+  const deniedEl = document.getElementById('gift-denied');
   const errorEl  = document.getElementById('error-msg');
 
-  const setStatus = (msg) => { allowBtn.textContent = msg; };
-  allowBtn.disabled = true;
+  box.classList.add('is-loading');
+  deniedEl.classList.add('hidden');
   errorEl.classList.add('hidden');
+  statusEl.textContent = '⏳ Đang đăng ký thông báo...';
+  statusEl.classList.remove('hidden');
 
   try {
-    // Step 1: Check support
-    setStatus('⏳ [1/4] Kiểm tra trình duyệt...');
-    if (!('Notification' in window)) throw new Error('Trình duyệt này không hỗ trợ thông báo.');
-    if (!('serviceWorker' in navigator)) throw new Error('Service Worker không được hỗ trợ. Hãy dùng Chrome.');
+    if (!('Notification' in window) || !('serviceWorker' in navigator))
+      throw new Error('Hãy dùng Chrome để nhận thông báo.');
+
     if (Notification.permission === 'denied') {
-      throw new Error('Thông báo đang bị chặn. Vào Chrome → biểu tượng 🔒 trên thanh địa chỉ → Thông báo → Cho phép, rồi thử lại.');
+      box.classList.remove('is-loading');
+      statusEl.classList.add('hidden');
+      deniedEl.classList.remove('hidden');
+      return;
     }
 
-    // Step 2: Opt in qua OneSignal (tự xử lý cả permission + push subscription)
-    setStatus('⏳ [2/4] Đăng ký thông báo...');
     await callOneSignal((OS) => OS.User.PushSubscription.optIn());
 
-    // Step 3: Poll chờ subscription ID (optIn async, mất vài giây)
-    setStatus('⏳ [3/4] Lấy subscription ID...');
+    statusEl.textContent = '⏳ Đang xác nhận...';
     let playerId = null;
     for (let i = 0; i < 20; i++) {
       playerId = await callOneSignal((OS) => OS.User.PushSubscription.id);
       if (playerId) break;
       await new Promise(r => setTimeout(r, 1000));
     }
-    if (!playerId) throw new Error('Không lấy được subscription ID sau 20s. Thử reset permission trong Chrome Settings rồi thử lại.');
+    if (!playerId) throw new Error('Không lấy được ID. Thử lại!');
 
-    // Step 4: Schedule qua Cloudflare Worker (proxy tránh CORS block của OneSignal)
-    setStatus('⏳ [4/4] Lên lịch thông báo...');
+    statusEl.textContent = '⏳ Đang lên lịch...';
     const sendAt = Date.now() + PRIZE_DELAY_MS;
 
     let workerRes;
@@ -139,22 +141,28 @@ async function requestNotificationPermission() {
         body: JSON.stringify({ playerId, sendAt }),
       });
     } catch (fetchErr) {
-      throw new Error(`Không kết nối được Worker: ${fetchErr.message}`);
+      throw new Error(`Không kết nối được: ${fetchErr.message}`);
     }
     if (!workerRes.ok) {
       const txt = await workerRes.text().catch(() => '');
-      throw new Error(`Worker lỗi ${workerRes.status}: ${txt}`);
+      throw new Error(`Lỗi ${workerRes.status}: ${txt}`);
     }
 
     localStorage.setItem('prizeAt', String(sendAt));
-    showSuccessScreen(sendAt);
+    statusEl.classList.add('hidden');
+    document.getElementById('gift-hint').style.opacity = '0';
+    openGiftBox(sendAt);
 
   } catch (err) {
     console.error('[Permission]', err);
-    errorEl.textContent = '⚠️ ' + err.message;
-    errorEl.classList.remove('hidden');
-    allowBtn.disabled    = false;
-    allowBtn.textContent = 'Thử Lại 🔔';
+    box.classList.remove('is-loading');
+    statusEl.classList.add('hidden');
+    if (typeof Notification !== 'undefined' && Notification.permission === 'denied') {
+      deniedEl.classList.remove('hidden');
+    } else {
+      errorEl.textContent = '⚠️ ' + err.message;
+      errorEl.classList.remove('hidden');
+    }
   }
 }
 
@@ -168,13 +176,35 @@ function callOneSignal(fn) {
   });
 }
 
-// ── Countdown ─────────────────────────────────────────────────────
-function showSuccessScreen(sendAt) {
-  currentState = 'success';
-  showScreen('screen-success');
+// ── Gift box open + sparkles ──────────────────────────────────────
+function openGiftBox(sendAt) {
+  const box = document.getElementById('giftbox');
+  if (box.classList.contains('opened')) return;
+  if (navigator.vibrate) navigator.vibrate([40, 20, 80]);
+  spawnSparkles(box);
+  box.classList.remove('is-loading');
+  box.classList.add('opened');
   if (countdownInterval) clearInterval(countdownInterval);
   tickCountdown(sendAt);
   countdownInterval = setInterval(() => tickCountdown(sendAt), 1000);
+}
+
+function spawnSparkles(el) {
+  const rect = el.getBoundingClientRect();
+  const cx = rect.left + rect.width / 2;
+  const cy = rect.top  + rect.height / 2;
+  const colors = ['#f09433','#dc2743','#bc1888','#ffd700','#ffffff','#ff6b9d','#a855f7'];
+  for (let i = 0; i < 20; i++) {
+    const s = document.createElement('div');
+    s.className = 'sparkle';
+    const angle = (i / 20) * 2 * Math.PI + Math.random() * 0.5;
+    const dist  = 70 + Math.random() * 140;
+    const size  = 6 + Math.random() * 10;
+    const dur   = (0.65 + Math.random() * 0.5).toFixed(2);
+    s.style.cssText = `left:${(cx-size/2).toFixed(1)}px;top:${(cy-size/2).toFixed(1)}px;width:${size.toFixed(1)}px;height:${size.toFixed(1)}px;background:${colors[i%colors.length]};--tx:${(Math.cos(angle)*dist).toFixed(1)}px;--ty:${(Math.sin(angle)*dist).toFixed(1)}px;--dur:${dur}s;animation-delay:${(Math.random()*0.12).toFixed(2)}s`;
+    document.body.appendChild(s);
+    setTimeout(() => s.remove(), (+dur + 0.2) * 1000);
+  }
 }
 
 function tickCountdown(sendAt) {
@@ -183,8 +213,8 @@ function tickCountdown(sendAt) {
   const msg = document.getElementById('success-msg');
 
   if (rem <= 0) {
-    el.textContent  = '00:00:00';
-    msg.textContent = '🎁 Phần thưởng đã được gửi! Kiểm tra thông báo nhé.';
+    el.textContent = '🎉';
+    if (msg) msg.textContent = 'Kiểm tra thông báo!';
     clearInterval(countdownInterval);
     return;
   }
@@ -193,29 +223,9 @@ function tickCountdown(sendAt) {
   const m = Math.floor((rem % 3_600_000) / 60_000).toString().padStart(2, '0');
   const s = Math.floor((rem % 60_000)    / 1_000).toString().padStart(2, '0');
   el.textContent = `${h}:${m}:${s}`;
+  if (msg && !msg.textContent) msg.textContent = 'Giữ thông báo bật nhé 😄';
 }
 
-// ── Share ─────────────────────────────────────────────────────────
-function shareChallenge() {
-  const score = localStorage.getItem('lastScore') ?? '??';
-  const text  = `Tao vừa click được ${score} lần trong 10 giây! 😤 Thử xem mày có hơn không?`;
-  if (navigator.share) {
-    navigator.share({ title: 'Thử Thách Phản Xạ', text, url: location.href }).catch(() => {});
-  } else {
-    navigator.clipboard.writeText(location.href)
-      .then(() => alert('Đã copy link!'))
-      .catch(() => alert(location.href));
-  }
-}
-
-// ── Show iOS tip if needed ────────────────────────────────────────
-function maybeShowIosTip() {
-  const isIos = /iPad|iPhone|iPod/.test(navigator.userAgent);
-  const isStandalone = window.navigator.standalone === true;
-  if (isIos && !isStandalone) {
-    document.getElementById('ios-tip').style.display = '';
-  }
-}
 
 // ── In-app browser detection ────────────────────────────────────
 function isInAppBrowser() {
@@ -265,43 +275,57 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Nếu notification bị tắt thì xóa prizeAt — bắt đăng ký lại
-  if (Notification.permission === 'denied') {
+  if (typeof Notification !== 'undefined' && Notification.permission === 'denied') {
     localStorage.removeItem('prizeAt');
   }
 
-  // Restore state if user already registered (page refresh / revisit)
+  // Restore: đã đăng ký → thẳng vào màn hộp quà đã mở
   const savedPrizeAt = localStorage.getItem('prizeAt');
   if (savedPrizeAt && Date.now() < parseInt(savedPrizeAt, 10)) {
-    showSuccessScreen(parseInt(savedPrizeAt, 10));
+    showScreen('screen-gift');
+    requestAnimationFrame(() => openGiftBox(parseInt(savedPrizeAt, 10)));
     return;
   }
 
   // Intro
   document.getElementById('btn-start').addEventListener('click', startGame);
 
-  // Game button — handle both touch (mobile) and click (desktop)
+  // Game button
   const gameBtn = document.getElementById('game-btn');
   gameBtn.addEventListener('click', handleGameTap);
   gameBtn.addEventListener('touchstart', (e) => {
-    e.preventDefault(); // kill 300ms delay & prevent ghost click
+    e.preventDefault();
     handleGameTap();
   }, { passive: false });
 
-  // Result
+  // Result → gift screen
   document.getElementById('btn-get-prize').addEventListener('click', () => {
-    maybeShowIosTip();
-    currentState = 'notify';
-    showScreen('screen-notify');
+    currentState = 'gift';
+    showScreen('screen-gift');
+    if (typeof Notification !== 'undefined' && Notification.permission === 'denied') {
+      document.getElementById('gift-denied').classList.remove('hidden');
+      document.getElementById('gift-hint').style.opacity = '0';
+    }
   });
   document.getElementById('btn-retry').addEventListener('click', () => {
     localStorage.removeItem('prizeAt');
     startGame();
   });
 
-  // Notification permission
-  document.getElementById('btn-allow').addEventListener('click', requestNotificationPermission);
-  document.getElementById('btn-skip').addEventListener('click', () => showScreen('screen-intro'));
+  // Gift box click → trigger notification subscription
+  const giftbox = document.getElementById('giftbox');
+  giftbox.addEventListener('click', () => {
+    if (giftbox.classList.contains('opened') || giftbox.classList.contains('is-loading')) return;
+    requestNotificationPermission();
+  });
 
-  // Success
-  document.getElementById('btn-share').addEventListener('click', shareChallenge);
+  // Retry after manually enabling notifications
+  document.getElementById('btn-retry-notif').addEventListener('click', () => {
+    if (typeof Notification !== 'undefined' && Notification.permission === 'denied') {
+      document.getElementById('gift-denied').classList.remove('hidden');
+      return;
+    }
+    document.getElementById('gift-denied').classList.add('hidden');
+    requestNotificationPermission();
+  });
 });

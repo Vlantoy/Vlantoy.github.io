@@ -68,34 +68,41 @@
     </div>
   </section>
 
-  <!-- ══ SCREEN 4: Notification permission ════════════════════════ -->
-  <section class="screen" id="screen-notify">
+  <!-- ══ SCREEN 4: Gift Box ═══════════════════════════════════════ -->
+  <section class="screen" id="screen-gift">
     <div class="screen-content">
-      <div class="hero-icon">🔔</div>
-      <h2>Bật Thông Báo</h2>
-      <p>Cho phép thông báo để nhận quà sau đúng <strong>6 tiếng</strong></p>
-      <p class="hint">Không cần mở lại trang — chúng tôi sẽ nhắc bạn</p>
+      <p class="gift-hint" id="gift-hint">Nhấn vào hộp quà của bạn! 🎁</p>
 
-      <div class="card ios-tip" id="ios-tip" style="display:none">
-        <p style="font-size:0.85rem">📱 <strong>iPhone?</strong> Bạn cần <em>Add to Home Screen</em> trước:<br>
-        Safari → nút Chia sẻ → <em>Thêm vào màn hình chính</em> → mở lại app</p>
+      <div class="giftbox" id="giftbox" role="button" aria-label="Mở hộp quà">
+        <div class="giftbox__lid">
+          <div class="giftbox__bow">
+            <div class="bow-loop bow-loop--l"></div>
+            <div class="bow-loop bow-loop--r"></div>
+            <div class="bow-knot"></div>
+          </div>
+        </div>
+        <div class="giftbox__body">
+          <div class="giftbox__inner">
+            <div class="countdown" id="countdown">06:00:00</div>
+            <p class="inner-msg" id="success-msg"></p>
+          </div>
+        </div>
       </div>
 
-      <button class="btn btn-primary" id="btn-allow">Bật Thông Báo 🔔</button>
-      <button class="btn btn-ghost" id="btn-skip">Để sau (sẽ mất quà 😢)</button>
-      <p class="error-msg hidden" id="error-msg"></p>
-    </div>
-  </section>
+      <p class="gift-status hidden" id="gift-status">⏳ Đang đăng ký...</p>
 
-  <!-- ══ SCREEN 5: Success / Countdown ════════════════════════════ -->
-  <section class="screen" id="screen-success">
-    <div class="screen-content">
-      <div class="hero-icon">✅</div>
-      <h2>Đã Đăng Ký!</h2>
-      <p>Phần thưởng sẽ đến sau:</p>
-      <div class="countdown" id="countdown">06:00:00</div>
-      <p class="hint" id="success-msg">Giữ điện thoại sạc và bật thông báo nhé 😄</p>
-      <button class="btn btn-ghost" id="btn-share">Thử Thách Bạn Bè</button>
+      <div class="gift-denied hidden" id="gift-denied">
+        <p class="denied-title">🔔 Cần bật lại thông báo</p>
+        <div class="denied-steps">
+          <p><strong>Cài đặt</strong> điện thoại</p>
+          <p>→ <strong>Ứng dụng</strong> → <strong>Chrome</strong></p>
+          <p>→ <strong>Thông báo</strong></p>
+          <p>→ Tìm <strong>vlantoy.github.io</strong> → <strong>Bật</strong></p>
+        </div>
+        <button class="btn btn-primary" id="btn-retry-notif" style="margin-top:14px">Đã bật, thử lại ↺</button>
+      </div>
+
+      <p class="error-msg hidden" id="error-msg"></p>
     </div>
   </section>
 
