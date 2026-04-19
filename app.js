@@ -10,14 +10,9 @@ const CLOUDFLARE_WORKER_URL = 'https://rickroll-scheduler.vlantoy.workers.dev';
 const DEV_MODE = true;
 // ══════════════════════════════════════════════════════════════════
 
-const GAME_DURATION  = 10;
 const PRIZE_DELAY_MS = DEV_MODE ? 3 * 1000 : 6 * 60 * 60 * 1000;    // 3s (dev) hoặc 6h (prod)
 
 // ── State ─────────────────────────────────────────────────────────
-let currentState      = 'intro';
-let clickCount        = 0;
-let timeLeft          = GAME_DURATION;
-let timerInterval     = null;
 let countdownInterval = null;
 
 // ── OneSignal init ────────────────────────────────────────────────
@@ -38,61 +33,6 @@ if (location.search.includes('reset')) { localStorage.clear(); location.replace(
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
-}
-
-// ── Game ──────────────────────────────────────────────────────────
-function startGame() {
-  currentState = 'game';
-  clickCount   = 0;
-  timeLeft     = GAME_DURATION;
-  showScreen('screen-game');
-  renderGame();
-
-  timerInterval = setInterval(() => {
-    timeLeft -= 1;
-    renderGame();
-    if (timeLeft <= 0) {
-      clearInterval(timerInterval);
-      timerInterval = null;
-      endGame();
-    }
-  }, 1000);
-}
-
-function renderGame() {
-  document.getElementById('time-left').textContent   = timeLeft;
-  document.getElementById('click-count').textContent = clickCount;
-  const pct = ((GAME_DURATION - timeLeft) / GAME_DURATION) * 100;
-  document.getElementById('timer-bar').style.width   = pct + '%';
-}
-
-function handleGameTap() {
-  if (currentState !== 'game') return;
-  clickCount += 1;
-  renderGame();
-
-  const btn = document.getElementById('game-btn');
-  btn.classList.add('clicked');
-  // Remove via requestAnimationFrame for snappiest feel
-  requestAnimationFrame(() => requestAnimationFrame(() => btn.classList.remove('clicked')));
-}
-
-function endGame() {
-  currentState = 'result';
-  localStorage.setItem('lastScore', String(clickCount));
-
-  const tiers = [
-    [0,   30,  '🐢 Chậm như rùa, nhưng vẫn ổn!'],
-    [30,  60,  '👍 Không tệ chút nào'],
-    [60,  90,  '⚡ Phản xạ siêu nhanh!'],
-    [90,  130, '🔥 Bạn là siêu nhân!'],
-    [130, Infinity, '💀 Ngón tay bất tử???'],
-  ];
-  const [,, rating] = tiers.find(([lo, hi]) => clickCount >= lo && clickCount < hi);
-
-  document.getElementById('final-score').textContent = clickCount;
-  document.getElementById('rating').textContent       = rating;
-  showScreen('screen-result');
 }
 
 // ── Notification flow ─────────────────────────────────────────────
@@ -287,30 +227,12 @@ document.addEventListener('DOMContentLoaded', () => {
     return;
   }
 
-  // Intro
-  document.getElementById('btn-start').addEventListener('click', startGame);
-
-  // Game button
-  const gameBtn = document.getElementById('game-btn');
-  gameBtn.addEventListener('click', handleGameTap);
-  gameBtn.addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    handleGameTap();
-  }, { passive: false });
-
-  // Result → gift screen
-  document.getElementById('btn-get-prize').addEventListener('click', () => {
-    currentState = 'gift';
-    showScreen('screen-gift');
-    if (typeof Notification !== 'undefined' && Notification.permission === 'denied') {
-      document.getElementById('gift-denied').classList.remove('hidden');
-      document.getElementById('gift-hint').style.opacity = '0';
-    }
-  });
-  document.getElementById('btn-retry').addEventListener('click', () => {
-    localStorage.removeItem('prizeAt');
-    startGame();
-  });
+  // Show gift screen immediately
+  showScreen('screen-gift');
+  if (typeof Notification !== 'undefined' && Notification.permission === 'denied') {
+    document.getElementById('gift-denied').classList.remove('hidden');
+    document.getElementById('gift-hint').style.opacity = '0';
+  }
 
   // Gift box click → trigger notification subscription
   const giftbox = document.getElementById('giftbox');

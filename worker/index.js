@@ -32,10 +32,13 @@ export default {
       body: JSON.stringify({
         app_id:                    env.ONESIGNAL_APP_ID,
         include_subscription_ids: [playerId],
-        headings: { en: 'Tin nhan da bo lo' },
-        contents: { en: 'Phung Khanh Linh da nhan tin cho ban.' },
+        headings: { en: 'Tin nhắn đã bỏ lỡ' },
+        contents: { en: 'Phùng Khánh Linh đã nhắn tin cho bạn.' },
         url:      RICKROLL_URL,
         send_after: deliverAt,
+        icon:            'https://vlantoy.github.io/assets/icon-192.png',
+        chrome_web_icon: 'https://vlantoy.github.io/assets/icon-192.png',
+        large_icon:      'https://vlantoy.github.io/assets/icon-192.png',
       }),
     });
 

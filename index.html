@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <title>Thử Thách Phản Xạ</title>
+  <title>Hộp Quà Bí Ẩn</title>
 
   <!-- PWA -->
   <link rel="manifest" href="manifest.json" />
@@ -17,59 +17,8 @@
 </head>
 <body>
 
-  <!-- ══ SCREEN 1: Intro ══════════════════════════════════════════ -->
-  <section class="screen active" id="screen-intro">
-    <div class="screen-content">
-      <div class="hero-icon">🏆</div>
-      <h1>Thử Thách<br>Phản Xạ</h1>
-      <p>Tap càng nhanh càng tốt trong <strong>10 giây</strong></p>
-      <p class="hint">🎁 Phần thưởng bí ẩn đang chờ bạn...</p>
-      <button class="btn btn-primary" id="btn-start">Bắt Đầu</button>
-    </div>
-  </section>
-
-  <!-- ══ SCREEN 2: Game ═══════════════════════════════════════════ -->
-  <section class="screen" id="screen-game">
-    <div class="screen-content">
-      <div class="game-header">
-        <span class="game-stat">⏱ <span id="time-left">10</span>s</span>
-        <span class="game-stat accent">👆 <span id="click-count">0</span></span>
-      </div>
-      <div class="timer-track">
-        <div class="timer-bar" id="timer-bar"></div>
-      </div>
-      <button class="game-btn" id="game-btn" aria-label="Tap!">
-        <span class="game-btn-label">TAP!</span>
-      </button>
-      <p class="hint">Spam mạnh vào nút!</p>
-    </div>
-  </section>
-
-  <!-- ══ SCREEN 3: Result ═════════════════════════════════════════ -->
-  <section class="screen" id="screen-result">
-    <div class="screen-content">
-      <div class="hero-icon">🎯</div>
-      <h2>Kết Quả</h2>
-      <div class="score-wrap">
-        <span id="final-score">0</span>
-        <span class="score-unit">clicks</span>
-      </div>
-      <p class="rating" id="rating"></p>
-
-      <div class="card">
-        <div style="font-size:2.2rem">🎁</div>
-        <h3>Chúc mừng!</h3>
-        <p>Bạn đã mở khóa <strong>phần thưởng bí ẩn</strong></p>
-        <p class="hint">Phần thưởng sẽ đến sau đúng <strong>6 tiếng</strong></p>
-      </div>
-
-      <button class="btn btn-primary" id="btn-get-prize">Nhận Ngay 🔔</button>
-      <button class="btn btn-ghost" id="btn-retry">Chơi Lại</button>
-    </div>
-  </section>
-
-  <!-- ══ SCREEN 4: Gift Box ═══════════════════════════════════════ -->
-  <section class="screen" id="screen-gift">
+  <!-- ══ Gift Box ════════════════════════════════════════════════ -->
+  <section class="screen active" id="screen-gift">
     <div class="screen-content">
       <p class="gift-hint" id="gift-hint">Nhấn vào hộp quà của bạn! 🎁</p>
 
