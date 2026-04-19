@@ -103,26 +103,28 @@ async function requestNotificationPermission() {
   errorEl.classList.add('hidden');
 
   try {
-    // Step 1: Check native Notification API support
+    // Step 1: Check support
     setStatus('⏳ [1/4] Kiểm tra trình duyệt...');
     if (!('Notification' in window)) throw new Error('Trình duyệt này không hỗ trợ thông báo. Hãy dùng Chrome hoặc Safari.');
     if (!('serviceWorker' in navigator)) throw new Error('Service Worker không được hỗ trợ. Hãy dùng Chrome hoặc Safari.');
 
-    // Step 2: Request permission directly via browser API (no OneSignal hang risk)
+    // Step 2: Request permission qua OneSignal (nó tự xử lý service worker + subscription)
     setStatus('⏳ [2/4] Xin quyền thông báo...');
-    const perm = await Promise.race([
-      Notification.requestPermission(),
-      new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout: Không nhận được phản hồi quyền thông báo sau 15s. Hãy kiểm tra popup ở thanh trên Chrome.')), 15000)),
+    const granted = await Promise.race([
+      callOneSignal((OS) => OS.Notifications.requestPermission()),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout 20s: Không nhận được phản hồi. Kiểm tra xem Chrome có block popup không.')), 20000)),
     ]);
-    if (perm !== 'granted') throw new Error(`Quyền bị từ chối (${perm}). Vào Settings → Notifications → cho phép trang này.`);
+    if (!granted) throw new Error('Quyền bị từ chối. Vào Settings → Notifications → cho phép trang này.');
 
-    // Step 3: Wait for OneSignal to subscribe
-    setStatus('⏳ [3/4] Đăng ký với OneSignal...');
-    const playerId = await Promise.race([
-      callOneSignal((OS) => OS.User.PushSubscription.id),
-      new Promise((_, reject) => setTimeout(() => reject(new Error('OneSignal timeout sau 15s. Site URL trong OneSignal dashboard có khớp với URL đang dùng không?')), 15000)),
-    ]);
-    if (!playerId) throw new Error('Không lấy được subscription ID. Kiểm tra App ID và Site URL trong OneSignal dashboard.');
+    // Step 3: Chờ OneSignal tạo xong subscription (có thể mất vài giây)
+    setStatus('⏳ [3/4] Đăng ký subscription...');
+    let playerId = null;
+    for (let i = 0; i < 15; i++) {
+      playerId = await callOneSignal((OS) => OS.User.PushSubscription.id);
+      if (playerId) break;
+      await new Promise(r => setTimeout(r, 1000));
+    }
+    if (!playerId) throw new Error('Không lấy được subscription ID sau 15s. Kiểm tra App ID và Site URL trong OneSignal dashboard.');
 
     // Step 4: Schedule notification
     setStatus('⏳ [4/4] Lên lịch thông báo...');
