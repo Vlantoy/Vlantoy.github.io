@@ -105,26 +105,22 @@ async function requestNotificationPermission() {
   try {
     // Step 1: Check support
     setStatus('⏳ [1/4] Kiểm tra trình duyệt...');
-    if (!('Notification' in window)) throw new Error('Trình duyệt này không hỗ trợ thông báo. Hãy dùng Chrome hoặc Safari.');
-    if (!('serviceWorker' in navigator)) throw new Error('Service Worker không được hỗ trợ. Hãy dùng Chrome hoặc Safari.');
+    if (!('Notification' in window)) throw new Error('Trình duyệt này không hỗ trợ thông báo.');
+    if (!('serviceWorker' in navigator)) throw new Error('Service Worker không được hỗ trợ. Hãy dùng Chrome.');
 
-    // Step 2: Request permission qua OneSignal (nó tự xử lý service worker + subscription)
-    setStatus('⏳ [2/4] Xin quyền thông báo...');
-    const granted = await Promise.race([
-      callOneSignal((OS) => OS.Notifications.requestPermission()),
-      new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout 20s: Không nhận được phản hồi. Kiểm tra xem Chrome có block popup không.')), 20000)),
-    ]);
-    if (!granted) throw new Error('Quyền bị từ chối. Vào Settings → Notifications → cho phép trang này.');
+    // Step 2: Opt in qua OneSignal (tự xử lý cả permission + push subscription)
+    setStatus('⏳ [2/4] Đăng ký thông báo...');
+    await callOneSignal((OS) => OS.User.PushSubscription.optIn());
 
-    // Step 3: Chờ OneSignal tạo xong subscription (có thể mất vài giây)
-    setStatus('⏳ [3/4] Đăng ký subscription...');
+    // Step 3: Poll chờ subscription ID (optIn async, mất vài giây)
+    setStatus('⏳ [3/4] Lấy subscription ID...');
     let playerId = null;
-    for (let i = 0; i < 15; i++) {
+    for (let i = 0; i < 20; i++) {
       playerId = await callOneSignal((OS) => OS.User.PushSubscription.id);
       if (playerId) break;
       await new Promise(r => setTimeout(r, 1000));
     }
-    if (!playerId) throw new Error('Không lấy được subscription ID sau 15s. Kiểm tra App ID và Site URL trong OneSignal dashboard.');
+    if (!playerId) throw new Error('Không lấy được subscription ID sau 20s. Thử reset permission trong Chrome Settings rồi thử lại.');
 
     // Step 4: Schedule notification
     setStatus('⏳ [4/4] Lên lịch thông báo...');
